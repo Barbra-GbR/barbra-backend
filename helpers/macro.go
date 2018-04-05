@@ -1,0 +1,9 @@
+package helpers
+
+type M map[string]string;
+
+func Fatal(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
