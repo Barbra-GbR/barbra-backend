@@ -3,10 +3,10 @@ package server
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"../controller"
-	"../config"
-	"../middlewares"
 	"github.com/gin-contrib/sessions"
+	"github.com/bitphinix/babra_backend/config"
+	"github.com/bitphinix/babra_backend/controller"
+	"github.com/bitphinix/babra_backend/middlewares"
 )
 
 func NewRouter() *gin.Engine {

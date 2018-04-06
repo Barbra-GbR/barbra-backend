@@ -2,8 +2,8 @@ package middlewares
 
 import (
 	"github.com/gin-gonic/gin"
-	"../auth"
 	"net/http"
+	"github.com/bitphinix/babra_backend/auth"
 )
 
 func AuthorizationMiddleware(c *gin.Context) {
@@ -15,9 +15,11 @@ func AuthorizationMiddleware(c *gin.Context) {
 	}
 
 	jwt := auth.GetJWT()
-	_, err := jwt.GetUserId(tokenString)
+	userId, err := jwt.GetUserId(tokenString)
 
 	if err != nil {
 		c.AbortWithStatus(http.StatusUnauthorized)
 	}
+
+	c.Set("user_id", userId)
 }

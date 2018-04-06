@@ -2,10 +2,9 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
-	"../helpers"
 	"net/http"
-	"../auth"
-	"../models"
+	"github.com/bitphinix/babra_backend/helpers"
+	"github.com/bitphinix/babra_backend/models"
 )
 
 func Error(c *gin.Context, code int, message string) {
@@ -14,16 +13,7 @@ func Error(c *gin.Context, code int, message string) {
 }
 
 func GetCurrentAccount(c *gin.Context) (*models.UserAccount, error) {
-	tokenString := c.GetHeader("Authorization")
-
-	jwt := auth.GetJWT()
-	accountId, err := jwt.GetUserId(tokenString)
-
-	if err != nil {
-		c.AbortWithStatus(http.StatusUnauthorized)
-		return nil, err
-	}
-
+	accountId := c.GetString("user_id")
 	user, err := models.GetUserAccount(accountId)
 
 	if err != nil {
@@ -31,5 +21,5 @@ func GetCurrentAccount(c *gin.Context) (*models.UserAccount, error) {
 		return nil, err
 	}
 
-	return user, err
+	return user, nil
 }

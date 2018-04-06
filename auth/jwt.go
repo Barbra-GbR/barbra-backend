@@ -2,11 +2,11 @@ package auth
 
 import (
 	"github.com/dgrijalva/jwt-go"
-	"../config"
 	"time"
 	"crypto/md5"
 	"encoding/hex"
 	"errors"
+	"github.com/bitphinix/babra_backend/config"
 )
 
 var (

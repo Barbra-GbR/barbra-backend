@@ -1,8 +1,8 @@
 package models
 
 import (
-	"../db"
 	"gopkg.in/mgo.v2"
+	"github.com/bitphinix/babra_backend/db"
 )
 
 type OpenIDAccount struct {

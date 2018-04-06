@@ -3,7 +3,7 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"../models"
+	"github.com/bitphinix/babra_backend/models"
 )
 
 type UserController struct{}
@@ -31,6 +31,7 @@ func (UserController) UpdateProfile(c *gin.Context) {
 	}
 
 	err = user.UpdateAccountInfo(userInfo)
+
 	if err == models.ErrEmailAlreadyInUse {
 		Error(c, http.StatusConflict, "email already in use")
 		return

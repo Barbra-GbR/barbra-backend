@@ -3,7 +3,7 @@ package models
 import (
 	"gopkg.in/mgo.v2/bson"
 	"errors"
-	"../db"
+	"github.com/bitphinix/babra_backend/db"
 )
 
 var (
@@ -61,14 +61,18 @@ func RegisterUser(userInfo *UserInfo) (*UserAccount, error) {
 func (account *UserAccount) UpdateAccountInfo(userInfo *UserInfo) error {
 	collection := db.GetDB().C("users")
 
+	userInfo.Normalize()
+
 	if !userInfo.Verify() {
 		return ErrInvalidUserInfo
 	}
 
-	count, err := collection.Find(bson.M{"user_info.email": userInfo.Email}).Count()
+	if account.Email != userInfo.Email {
+		count, err := collection.Find(bson.M{"user_info.email": userInfo.Email}).Count()
 
-	if err != nil || count > 0 {
-		return ErrEmailAlreadyInUse
+		if err != nil || count > 0 {
+			return ErrEmailAlreadyInUse
+		}
 	}
 
 	account.UserInfo = userInfo

@@ -3,13 +3,13 @@ package auth
 import (
 	"github.com/coreos/go-oidc"
 	"golang.org/x/oauth2"
-	"../config"
 	"context"
 	"fmt"
 	"errors"
 	"encoding/base64"
 	"crypto/rand"
-	"../models"
+	"github.com/bitphinix/babra_backend/config"
+	"github.com/bitphinix/babra_backend/models"
 )
 
 var (

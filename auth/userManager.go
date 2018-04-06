@@ -1,12 +1,12 @@
 package auth
 
 import (
-	"../config"
 	"errors"
-	"../models"
 	"gopkg.in/mgo.v2"
 	"golang.org/x/oauth2"
 	"github.com/coreos/go-oidc"
+	"github.com/bitphinix/babra_backend/config"
+	"github.com/bitphinix/babra_backend/models"
 )
 
 var (

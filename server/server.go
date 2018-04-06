@@ -1,7 +1,7 @@
 package server
 
 import (
-	"../config"
+	"github.com/bitphinix/babra_backend/config"
 )
 
 func Init() {
