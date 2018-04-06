@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/babra_backend.iml" filepath="$PROJECT_DIR$/.idea/babra_backend.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/backend_new.iml" filepath="$PROJECT_DIR$/.idea/backend_new.iml" />
     </modules>
   </component>
 </project>

@@ -3,7 +3,7 @@ package models
 import (
 	"gopkg.in/mgo.v2/bson"
 	"errors"
-	"github.com/bitphinix/babra_backend/db"
+	"github.com/bitphinix/barbra_backend/db"
 )
 
 var (
@@ -13,7 +13,7 @@ var (
 
 type UserAccount struct {
 	*UserInfo `bson:"user_info"`
-	ID string `json:"id" bson:"_id"`
+	Id string `json:"id" bson:"_id"`
 }
 
 func GetUserAccount(id string) (*UserAccount, error) {
@@ -46,16 +46,12 @@ func RegisterUser(userInfo *UserInfo) (*UserAccount, error) {
 
 	account := &UserAccount{
 		UserInfo: userInfo,
-		ID:       bson.NewObjectId().Hex(),
+		Id:       bson.NewObjectId().Hex(),
 	}
 
 	err = collection.Insert(account)
 
-	if err != nil {
-		return nil, err
-	}
-
-	return account, nil
+	return account, err
 }
 
 func (account *UserAccount) UpdateAccountInfo(userInfo *UserInfo) error {
@@ -76,10 +72,15 @@ func (account *UserAccount) UpdateAccountInfo(userInfo *UserInfo) error {
 	}
 
 	account.UserInfo = userInfo
-	return account.Save()
+	return account.Update()
 }
 
-func (account *UserAccount) Save() error {
+func (account *UserAccount) Update() error {
 	collection := db.GetDB().C("users")
-	return collection.UpdateId(account.ID, account)
+	return collection.UpdateId(account.Id, account)
+}
+
+func (account *UserAccount) Delete() error {
+	collection := db.GetDB().C("users")
+	return collection.RemoveId(account.Id)
 }

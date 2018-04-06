@@ -6,7 +6,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"errors"
-	"github.com/bitphinix/babra_backend/config"
+	"github.com/bitphinix/barbra_backend/config"
 )
 
 var (
@@ -52,7 +52,7 @@ func (j *JWT) GenerateToken(accountId string) (string, error) {
 		IssuedAt:  now.Unix(),
 		Audience:  j.issuer,
 		NotBefore: now.Unix(),
-		Id:        j.NewTokenID(accountId),
+		Id:        j.NewTokenId(accountId),
 	})
 
 	return token.SignedString(j.secret)
@@ -90,7 +90,7 @@ func (j *JWT) GetUserId(tokenString string) (string, error) {
 	return claims.Subject, nil
 }
 
-func (j *JWT) NewTokenID(accountId string) string {
+func (j *JWT) NewTokenId(accountId string) string {
 	m := md5.New()
 	m.Write([]byte(accountId + ":" + time.Now().String() + ":" + string(j.idCount)))
 	return hex.EncodeToString(m.Sum(nil))

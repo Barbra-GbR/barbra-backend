@@ -3,7 +3,7 @@ package models
 import (
 	"strings"
 	"html"
-	"github.com/bitphinix/babra_backend/helpers"
+	"github.com/bitphinix/barbra_backend/helpers"
 )
 
 type UserInfo struct {

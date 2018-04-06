@@ -8,28 +8,28 @@ import (
 	"errors"
 	"encoding/base64"
 	"crypto/rand"
-	"github.com/bitphinix/babra_backend/config"
-	"github.com/bitphinix/babra_backend/models"
+	"github.com/bitphinix/barbra_backend/config"
+	"github.com/bitphinix/barbra_backend/models"
 )
 
 var (
-	ErrUnableToFetchOIDToken = errors.New("openIDProvider: Unable to fetch oidToken")
+	ErrUnableToFetchOIdToken = errors.New("openIdProvider: Unable to fetch oidToken")
 )
 
-type OpenIDClient struct {
+type OpenIdClient struct {
 	oidVerifier  *oidc.IDTokenVerifier
 	oidProvider  *oidc.Provider
 	oAuth2Config *oauth2.Config
 }
 
-func LoadOpenIDClient(providerID string) (*OpenIDClient, error) {
+func LoadOpenIdClient(providerId string) (*OpenIdClient, error) {
 	c := config.GetConfig()
-	cAddr := "auth." + providerID
+	cAddr := "auth." + providerId
 
 	oauth2Config := &oauth2.Config{
 		ClientID:     c.GetString(cAddr + ".key"),
 		ClientSecret: c.GetString(cAddr + ".secret"),
-		RedirectURL:  getCallbackURL(c.GetString("server.host"), providerID),
+		RedirectURL:  getCallbackURL(c.GetString("server.host"), providerId),
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  c.GetString(cAddr + ".endpoint.auth_url"),
 			TokenURL: c.GetString(cAddr + ".endpoint.token_url"),
@@ -41,7 +41,7 @@ func LoadOpenIDClient(providerID string) (*OpenIDClient, error) {
 		},
 	}
 
-	oidProvider, err := oidc.NewProvider(context.Background(), c.GetString(cAddr + ".endpoint.url"))
+	oidProvider, err := oidc.NewProvider(context.Background(), c.GetString(cAddr+".endpoint.url"))
 
 	if err != nil {
 		return nil, err
@@ -49,36 +49,36 @@ func LoadOpenIDClient(providerID string) (*OpenIDClient, error) {
 
 	oidVerifier := oidProvider.Verifier(&oidc.Config{ClientID: oauth2Config.ClientID})
 
-	return &OpenIDClient{
+	return &OpenIdClient{
 		oidProvider:  oidProvider,
 		oAuth2Config: oauth2Config,
 		oidVerifier:  oidVerifier,
 	}, nil
 }
 
-func (client *OpenIDClient) GenerateLoginURL(state string) string {
+func (client *OpenIdClient) GenerateLoginURL(state string) string {
 	return client.oAuth2Config.AuthCodeURL(state)
 }
 
-func (client *OpenIDClient) FetchOAuthToken(code string) (*oauth2.Token, error) {
+func (client *OpenIdClient) FetchOAuthToken(code string) (*oauth2.Token, error) {
 	return client.oAuth2Config.Exchange(context.Background(), code)
 }
 
-func (client *OpenIDClient) FetchOIDToken(oauth2Token *oauth2.Token) (*oidc.IDToken, error) {
-	rawOIDToken, ok := oauth2Token.Extra("id_token").(string)
+func (client *OpenIdClient) FetchOIdToken(oauth2Token *oauth2.Token) (*oidc.IDToken, error) {
+	rawOIdToken, ok := oauth2Token.Extra("id_token").(string)
 
 	if !ok {
-		return nil, ErrUnableToFetchOIDToken
+		return nil, ErrUnableToFetchOIdToken
 	}
 
-	return client.oidVerifier.Verify(context.Background(), rawOIDToken)
+	return client.oidVerifier.Verify(context.Background(), rawOIdToken)
 }
 
-func (client *OpenIDClient) GetUserSub(token *oidc.IDToken) string {
+func (client *OpenIdClient) GetUserSub(token *oidc.IDToken) string {
 	return token.Subject
 }
 
-func (client *OpenIDClient) FetchUserInfo(token *oauth2.Token) (*models.UserInfo, error) {
+func (client *OpenIdClient) FetchUserInfo(token *oauth2.Token) (*models.UserInfo, error) {
 	oidProfile, err := client.oidProvider.UserInfo(context.Background(), oauth2.StaticTokenSource(token))
 
 	if err != nil {
@@ -95,8 +95,8 @@ func (client *OpenIDClient) FetchUserInfo(token *oauth2.Token) (*models.UserInfo
 	return userInfo, nil
 }
 
-func getCallbackURL(host string, providerID string) string {
-	return fmt.Sprintf("%s/api/v1/login/%s/callback", host, providerID)
+func getCallbackURL(host string, providerId string) string {
+	return fmt.Sprintf("%s/api/v1/login/%s/callback", host, providerId)
 }
 
 func GenerateToken(length int) (string, error) {

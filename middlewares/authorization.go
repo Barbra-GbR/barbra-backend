@@ -3,7 +3,7 @@ package middlewares
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"github.com/bitphinix/babra_backend/auth"
+	"github.com/bitphinix/barbra_backend/auth"
 )
 
 func AuthorizationMiddleware(c *gin.Context) {

@@ -4,17 +4,16 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"github.com/gin-contrib/sessions"
-	"github.com/bitphinix/babra_backend/models"
-	"github.com/bitphinix/babra_backend/helpers"
-	"github.com/bitphinix/babra_backend/auth"
+	"github.com/bitphinix/barbra_backend/models"
+	"github.com/bitphinix/barbra_backend/helpers"
+	"github.com/bitphinix/barbra_backend/auth"
 )
 
-type LoginController struct {}
+type LoginController struct{}
 
 func (LoginController) Auth(c *gin.Context) {
-	providerID := c.Param("provider")
+	providerId := c.Param("provider")
 	userManager := auth.GetUserManager();
-
 	state, err := auth.GenerateToken(64)
 
 	if err != nil {
@@ -22,7 +21,7 @@ func (LoginController) Auth(c *gin.Context) {
 		return
 	}
 
-	url, err := userManager.GenerateLoginUrl(providerID, state)
+	url, err := userManager.GenerateLoginUrl(providerId, state)
 
 	if err != nil {
 		Error(c, http.StatusInternalServerError, "unable to generate login url")
@@ -31,7 +30,7 @@ func (LoginController) Auth(c *gin.Context) {
 
 	session := sessions.Default(c)
 	session.Set("state", state)
-	session.Set("provider_id", providerID)
+	session.Set("provider_id", providerId)
 	session.Save()
 
 	c.Redirect(http.StatusTemporaryRedirect, url)
@@ -42,11 +41,11 @@ func (LoginController) AuthCallback(c *gin.Context) {
 	userManager := auth.GetUserManager();
 	jwt := auth.GetJWT()
 
-	providerID := c.Param("provider")
+	providerId := c.Param("provider")
 	state := c.Query("state")
 
 	//cross-site-forgery protection
-	if providerID != session.Get("provider_id") || state != session.Get("state") {
+	if providerId != session.Get("provider_id") || state != session.Get("state") {
 		//TODO: Error page (unknown error)
 		Error(c, http.StatusBadRequest, "Error page (unknown error)")
 		return
@@ -57,7 +56,7 @@ func (LoginController) AuthCallback(c *gin.Context) {
 	session.Clear()
 	session.Save()
 
-	account, err := userManager.GetAccount(providerID, c.Query("code"))
+	account, err := userManager.GetAccount(providerId, c.Query("code"))
 
 	if err == models.ErrEmailAlreadyInUse {
 		//TODO: Error page (email already in use)
@@ -77,7 +76,7 @@ func (LoginController) AuthCallback(c *gin.Context) {
 		return
 	}
 
-	token, err := jwt.GenerateToken(account.ID)
+	token, err := jwt.GenerateToken(account.Id)
 
 	if err != nil {
 		//TODO: Error page (unknown error)

@@ -3,8 +3,8 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"github.com/bitphinix/babra_backend/helpers"
-	"github.com/bitphinix/babra_backend/models"
+	"github.com/bitphinix/barbra_backend/helpers"
+	"github.com/bitphinix/barbra_backend/models"
 )
 
 func Error(c *gin.Context, code int, message string) {
