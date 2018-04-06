@@ -117,7 +117,8 @@ func (manager *UserManager) RegisterAccount(providerId string, oauth2Token *oaut
 	_, err = models.RegisterOIdAccount(providerId, oidToken.Subject, account.Id)
 
 	if err != nil {
-		account.Delete()
+		_ = account.Delete()
+		
 		return nil, err
 	}
 
