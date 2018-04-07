@@ -7,30 +7,30 @@ import (
 )
 
 type Suggestion struct {
-	Url     string   `json:"url" bson:"url" binding:"required"`
-	Kind    string   `json:"kind" bson:"kind" binding:"required"`
-	Title   string   `json:"title" bson:"title" binding:"required"`
-	Topic   string   `json:"topic" bson:"topic" binding:"required"`
-	Tags    []string `json:"tags" bson:"tags" binding:"required"`
-	Content string   `json:"content" bson:"content" binding:"required"`
-	LogoUrl string   `json:"logo_url" bson:"logo_url" binding:"required"`
-	Id      string   `json:"id" bson:"_id" binding:"required"`
+	Provider string   `json:"provider" bson:"provider" binding:"required"`
+	Url      string   `json:"url" bson:"url" binding:"required"`
+	Kind     string   `json:"kind" bson:"kind" binding:"required"`
+	Title    string   `json:"title" bson:"title" binding:"required"`
+	Category string   `json:"category" bson:"category" binding:"required"`
+	Tags     []string `json:"tags" bson:"tags" binding:"required"`
+	Content  string   `json:"content" bson:"content" binding:"required"`
+	Id       string   `json:"id" bson:"_id" binding:"required"`
 }
 
-func NewSuggestion(url string, kind string, title string, topic string, tags []string, content string, logoUrl string) *Suggestion {
+func NewSuggestion(url string, kind string, title string, category string, provider string, tags []string, content string) *Suggestion {
 	return &Suggestion{
-		Id:      bson.NewObjectId().Hex(),
-		Content: content,
-		Kind:    kind,
-		LogoUrl: logoUrl,
-		Tags:    tags,
-		Title:   title,
-		Topic:   topic,
-		Url:     url,
+		Id:       bson.NewObjectId().Hex(),
+		Content:  content,
+		Kind:     kind,
+		Tags:     tags,
+		Title:    title,
+		Category: category,
+		Url:      url,
+		Provider: provider,
 	}
 }
 
-func GetSuggestion(url string, kind string, title string, topic string, tags []string, content string, logoUrl string) (*Suggestion, error) {
+func GetSuggestion(url string, kind string, title string, provider string, category string, tags []string, content string) (*Suggestion, error) {
 	collection := db.GetDB().C("suggestions")
 
 	suggestion := new(Suggestion)
@@ -38,14 +38,14 @@ func GetSuggestion(url string, kind string, title string, topic string, tags []s
 		"url":      url,
 		"kind":     kind,
 		"title":    title,
-		"topic":    topic,
+		"category": category,
 		"tags":     tags,
 		"content":  content,
-		"logo_url": logoUrl,
+		"provider": provider,
 	}).One(suggestion)
 
 	if err == mgo.ErrNotFound {
-		suggestion := NewSuggestion(url, kind, title, topic, tags, content, logoUrl)
+		suggestion = NewSuggestion(url, kind, title, category, provider, tags, content)
 		err = suggestion.Save()
 	}
 

@@ -22,6 +22,7 @@ func NewRouter() *gin.Engine {
 	//Controller
 	loginController := new(controller.LoginController)
 	userController := new(controller.UserController)
+	suggestionController := new(controller.SuggestionController)
 
 	//Public routes
 	public := router.Group("/api/v1/")
@@ -30,10 +31,16 @@ func NewRouter() *gin.Engine {
 
 	//Private routes
 	private := router.Group("/api/v1")
-	private.Use(middlewares.AuthorizationMiddleware)
+	private.Use(middlewares.AuthorizationMiddleware(false))
 
 	private.Handle(http.MethodGet, "/user", userController.GetAccount)
 	private.Handle(http.MethodPut, "/user", userController.UpdateProfile)
+
+	//Private routes (enrolled accounts only)
+	enrolled := router.Group("/api/v1")
+	enrolled.Use(middlewares.AuthorizationMiddleware(true))
+
+	enrolled.Handle(http.MethodGet, "/suggestions", suggestionController.GetSuggestions)
 
 	return router
 }

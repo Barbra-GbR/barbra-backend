@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"github.com/bitphinix/barbra_backend/models"
+	"github.com/bitphinix/barbra_backend/payloads"
 )
 
 type UserController struct{}
@@ -18,8 +19,8 @@ func (UserController) GetAccount(c *gin.Context) {
 }
 
 func (UserController) UpdateProfile(c *gin.Context) {
-	userInfo := new(models.UserInfo)
-	err := c.BindJSON(userInfo)
+	payload := new(payloads.ProfilePayload)
+	err := c.BindJSON(payload)
 	if err != nil {
 		Error(c, http.StatusUnprocessableEntity, err.Error())
 		return
@@ -30,7 +31,7 @@ func (UserController) UpdateProfile(c *gin.Context) {
 		return
 	}
 
-	err = user.UpdateAccountInfo(userInfo)
+	err = user.UpdateAccountInfo(payload)
 
 	if err == models.ErrEmailAlreadyInUse {
 		Error(c, http.StatusConflict, "email already in use")
@@ -38,7 +39,7 @@ func (UserController) UpdateProfile(c *gin.Context) {
 	}
 
 	if err != nil {
-		Error(c, http.StatusUnprocessableEntity, "invalid userInfo")
+		Error(c, http.StatusUnprocessableEntity, "invalid payload")
 		return
 	}
 

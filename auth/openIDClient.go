@@ -9,7 +9,7 @@ import (
 	"encoding/base64"
 	"crypto/rand"
 	"github.com/bitphinix/barbra_backend/config"
-	"github.com/bitphinix/barbra_backend/models"
+	"github.com/bitphinix/barbra_backend/payloads"
 )
 
 var (
@@ -78,21 +78,21 @@ func (client *OpenIdClient) GetUserSub(token *oidc.IDToken) string {
 	return token.Subject
 }
 
-func (client *OpenIdClient) FetchUserInfo(token *oauth2.Token) (*models.UserInfo, error) {
+func (client *OpenIdClient) FetchProfilePayload(token *oauth2.Token) (*payloads.ProfilePayload, error) {
 	oidProfile, err := client.oidProvider.UserInfo(context.Background(), oauth2.StaticTokenSource(token))
 
 	if err != nil {
 		return nil, err
 	}
 
-	userInfo := new(models.UserInfo)
-	err = oidProfile.Claims(userInfo)
+	payload := new(payloads.ProfilePayload)
+	err = oidProfile.Claims(payload)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return userInfo, nil
+	return payload, nil
 }
 
 func getCallbackURL(host string, providerId string) string {

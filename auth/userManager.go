@@ -104,12 +104,12 @@ func (manager *UserManager) RegisterAccount(providerId string, oauth2Token *oaut
 		return nil, err
 	}
 
-	userInfo, err := client.FetchUserInfo(oauth2Token)
+	payload, err := client.FetchProfilePayload(oauth2Token)
 	if err != nil {
 		return nil, err
 	}
 
-	account, err := models.RegisterUser(userInfo)
+	account, err := models.RegisterUser(payload)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +118,7 @@ func (manager *UserManager) RegisterAccount(providerId string, oauth2Token *oaut
 
 	if err != nil {
 		_ = account.Delete()
-		
+
 		return nil, err
 	}
 

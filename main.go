@@ -8,6 +8,7 @@ import (
 	"github.com/bitphinix/barbra_backend/server"
 	"github.com/bitphinix/barbra_backend/config"
 	"github.com/bitphinix/barbra_backend/auth"
+	"github.com/bitphinix/barbra_backend/helpers"
 )
 
 func main() {
@@ -21,6 +22,7 @@ func main() {
 	flag.Parse()
 
 	//Initialization
+	helpers.InitValidator()
 	config.Init(*environment)
 	db.Init()
 	auth.InitJWT()
