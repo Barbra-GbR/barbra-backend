@@ -64,7 +64,7 @@ func (LoginController) AuthCallback(c *gin.Context) {
 		return
 	}
 
-	if err == models.ErrInvalidUserInfo {
+	if err == models.ErrInvalidPayload {
 		//TODO: Error page (permissions, incomplete profile)
 		Error(c, http.StatusBadRequest, "Error page (permissions, incomplete profile)")
 		return

@@ -10,18 +10,15 @@ import (
 )
 
 var (
-	ErrInvalidUserInfo   = errors.New("user: invalid UserInfo")
+	ErrInvalidPayload    = errors.New("user: invalid payload")
 	ErrEmailAlreadyInUse = errors.New("user: email already in use")
 )
 
 type UserAccount struct {
-	Id         string `json:"id"          bson:"_id"                   validate:"hexadecimal"                  binding:"required"`
-	Enrolled   bool   `json:"enrolled"    bson:"enrolled"                                                      binding:"required"`
-	Email      string `json:"email"       bson:"email,omitempty"       validate:"email,lowercase"              binding:"required"`
-	GivenName  string `json:"given_name"  bson:"given_name,omitempty"  validate:"alphaunicode,min=1,max=50"    binding:"required"`
-	FamilyName string `json:"family_name" bson:"family_name,omitempty" validate:"alphaunicode,min=1,max=50"    binding:"required"`
-	PictureURL string `json:"picture"     bson:"picture,omitempty"     validate:"url"                          binding:"required"`
-	Nickname   string `json:"nickname"    bson:"nickname,omitempty"    validate:"alphanumunicode,min=2,max=50" binding:"required"`
+	Id        string               `json:"id"        bson:"_id"      validate:"hexadecimal" binding:"required"`
+	Enrolled  bool                 `json:"enrolled"  bson:"enrolled"                        binding:"required"`
+	Profile   *UserProfile         `json:"-"         bson:"profile"                         binding:"required"`
+	Bookmarks map[string]*Bookmark `json:"-"         bson:"bookmarks"                       binding:"required"`
 }
 
 func GetUserAccount(id string) (*UserAccount, error) {
@@ -47,9 +44,10 @@ func RegisterUser(payload *payloads.ProfilePayload) (*UserAccount, error) {
 	collection := db.GetDB().C("users")
 	validate := helpers.GetValidator()
 
+	//Check if payload is valid
 	if err := validate.Struct(payload); err != nil {
 		log.Println(err.Error())
-		return nil, ErrInvalidUserInfo
+		return nil, ErrInvalidPayload
 	}
 
 	//Check if email is already in use
@@ -61,54 +59,33 @@ func RegisterUser(payload *payloads.ProfilePayload) (*UserAccount, error) {
 	}
 
 	account := &UserAccount{
-		Email:      payload.Email,
-		Id:         bson.NewObjectId().Hex(),
-		Enrolled:   false,
-		FamilyName: payload.FamilyName,
-		GivenName:  payload.GivenName,
-		Nickname:   payload.Nickname,
-		PictureURL: payload.PictureURL,
+		Id:       bson.NewObjectId().Hex(),
+		Enrolled: false,
+		Profile: &UserProfile{
+			Email:      payload.Email,
+			FamilyName: payload.FamilyName,
+			GivenName:  payload.GivenName,
+			Nickname:   payload.Nickname,
+			PictureURL: payload.PictureURL,
+		},
+		Bookmarks:make(map[string]*Bookmark),
 	}
 
 	account.Enrolled = account.IsEnrolled()
 	return account, account.Save()
 }
 
-func (account *UserAccount) UpdateAccountInfo(payload *payloads.ProfilePayload) error {
-	collection := db.GetDB().C("users")
-	validate := helpers.GetValidator()
+func (account *UserAccount) UpdateProfile(payload *payloads.ProfilePayload) error {
+	err := account.Profile.UpdateInfo(payload)
 
-	if err := validate.Struct(payload); err != nil {
-		return ErrInvalidUserInfo
-	}
-
-	if account.Email != payload.Email && payload.Email != "" {
-		count, err := collection.Find(bson.M{"email": payload.Email}).Count()
-
-		if err != nil || count > 0 {
-			return ErrEmailAlreadyInUse
-		}
-
-		account.Email = payload.Email
-	}
-
-	//The ugly but efficient way
-	if payload.PictureURL != "" {
-		account.PictureURL = payload.PictureURL
-	}
-	if payload.Nickname != "" {
-		account.Nickname = payload.Nickname
-	}
-	if payload.GivenName != "" {
-		account.GivenName = payload.GivenName
-	}
-	if payload.FamilyName != "" {
-		account.FamilyName = payload.FamilyName
+	if err != nil {
+		return err
 	}
 
 	account.Enrolled = account.IsEnrolled()
 	return account.Update()
 }
+
 
 func (account *UserAccount) Save() error {
 	collection := db.GetDB().C("users")

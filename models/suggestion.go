@@ -4,17 +4,22 @@ import (
 	"github.com/bitphinix/barbra_backend/db"
 	"gopkg.in/mgo.v2/bson"
 	"gopkg.in/mgo.v2"
+	"errors"
+)
+
+var (
+	ErrSuggestionNotFound = errors.New("suggestion: not found")
 )
 
 type Suggestion struct {
 	Provider string   `json:"provider" bson:"provider" binding:"required"`
-	Url      string   `json:"url" bson:"url" binding:"required"`
-	Kind     string   `json:"kind" bson:"kind" binding:"required"`
-	Title    string   `json:"title" bson:"title" binding:"required"`
+	Url      string   `json:"url"      bson:"url"      binding:"required"`
+	Kind     string   `json:"kind"     bson:"kind"     binding:"required"`
+	Title    string   `json:"title"    bson:"title"    binding:"required"`
 	Category string   `json:"category" bson:"category" binding:"required"`
-	Tags     []string `json:"tags" bson:"tags" binding:"required"`
-	Content  string   `json:"content" bson:"content" binding:"required"`
-	Id       string   `json:"id" bson:"_id" binding:"required"`
+	Tags     []string `json:"tags"     bson:"tags"     binding:"required"`
+	Content  string   `json:"content"  bson:"content"  binding:"required"`
+	Id       string   `json:"id"       bson:"_id"      binding:"required"`
 }
 
 func NewSuggestion(url string, kind string, title string, category string, provider string, tags []string, content string) *Suggestion {
@@ -58,6 +63,12 @@ func FindSuggestionById(id string) (*Suggestion, error) {
 	suggestion := new(Suggestion)
 	err := collection.FindId(id).One(suggestion)
 	return suggestion, err
+}
+
+func SuggestionExists(id string) bool {
+	collection := db.GetDB().C("suggestions")
+	count, err := collection.FindId(id).Count()
+	return count > 0 && err == nil
 }
 
 func (suggestion Suggestion) Save() error {

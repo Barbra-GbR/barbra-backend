@@ -10,12 +10,21 @@ import (
 type UserController struct{}
 
 func (UserController) GetAccount(c *gin.Context) {
-	user, err := GetCurrentAccount(c)
+	account, err := GetCurrentAccount(c)
 	if err != nil {
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, account)
+}
+
+func (UserController) GetProfile(c *gin.Context) {
+	account, err := GetCurrentAccount(c)
+	if err != nil {
+		return
+	}
+
+	c.JSON(http.StatusOK, account.Profile)
 }
 
 func (UserController) UpdateProfile(c *gin.Context) {
@@ -31,7 +40,7 @@ func (UserController) UpdateProfile(c *gin.Context) {
 		return
 	}
 
-	err = user.UpdateAccountInfo(payload)
+	err = user.UpdateProfile(payload)
 
 	if err == models.ErrEmailAlreadyInUse {
 		Error(c, http.StatusConflict, "email already in use")
@@ -42,6 +51,5 @@ func (UserController) UpdateProfile(c *gin.Context) {
 		Error(c, http.StatusUnprocessableEntity, "invalid payload")
 		return
 	}
-
-	c.JSON(http.StatusOK, user)
 }
+
