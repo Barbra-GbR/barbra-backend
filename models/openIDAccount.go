@@ -37,10 +37,6 @@ func getOIdAccountId(provider string, sub string) string {
 
 func (account *OpenIdAccount) Save() error {
 	collection := db.GetDB().C("openid_accounts")
-	return collection.Insert(account)
-}
-
-func (account *OpenIdAccount) Update() error {
-	collection := db.GetDB().C("openid_accounts")
-	return collection.UpdateId(account.Id, account)
+	_, err := collection.UpsertId(account.Id, account)
+	return err
 }

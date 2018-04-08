@@ -15,11 +15,10 @@ var (
 )
 
 type UserAccount struct {
-	Id               string               `json:"id"        bson:"_id"                        validate:"hexadecimal" binding:"required"`
-	Enrolled         bool                 `json:"enrolled"  bson:"enrolled"                                          binding:"required"`
-	Profile          *UserProfile         `json:"-"         bson:"profile"                                           binding:"required"`
-	Bookmarks        map[string]*Bookmark `json:"-"         bson:"bookmarks"                                         binding:"required"`
-	RecentSuggestion []string             `json:"-"         bson:"recent_suggestion,omitempty"`
+	Id                  string               `json:"id"        bson:"_id"                          validate:"hexadecimal" binding:"required"`
+	Enrolled            bool                 `json:"enrolled"  bson:"enrolled"                                            binding:"required"`
+	Profile             *UserProfile         `json:"-"         bson:"profile"                                             binding:"required"`
+	BookmarkContainerId string               `json:"-"         bson:"bookmark_container_id"        validate:"hexadecimal" binding:"required"`
 }
 
 func GetUserAccount(id string) (*UserAccount, error) {
@@ -33,12 +32,6 @@ func GetUserAccount(id string) (*UserAccount, error) {
 	}
 
 	return account, nil
-}
-
-func (account *UserAccount) IsEnrolled() bool {
-	validate := helpers.GetValidator()
-	err := validate.Struct(account)
-	return err == nil
 }
 
 func RegisterUser(payload *payloads.ProfilePayload) (*UserAccount, error) {
@@ -59,6 +52,12 @@ func RegisterUser(payload *payloads.ProfilePayload) (*UserAccount, error) {
 		}
 	}
 
+	bookmarkContainer, err := NewBookmarkContainer()
+
+	if err != nil {
+		return nil, err
+	}
+
 	account := &UserAccount{
 		Id:       bson.NewObjectId().Hex(),
 		Enrolled: false,
@@ -69,11 +68,17 @@ func RegisterUser(payload *payloads.ProfilePayload) (*UserAccount, error) {
 			Nickname:   payload.Nickname,
 			PictureURL: payload.PictureURL,
 		},
-		Bookmarks:make(map[string]*Bookmark),
+		BookmarkContainerId: bookmarkContainer.Id,
 	}
 
 	account.Enrolled = account.IsEnrolled()
 	return account, account.Save()
+}
+
+func (account *UserAccount) IsEnrolled() bool {
+	validate := helpers.GetValidator()
+	err := validate.Struct(account)
+	return err == nil
 }
 
 func (account *UserAccount) UpdateProfile(payload *payloads.ProfilePayload) error {
@@ -84,21 +89,17 @@ func (account *UserAccount) UpdateProfile(payload *payloads.ProfilePayload) erro
 	}
 
 	account.Enrolled = account.IsEnrolled()
-	return account.Update()
+	return account.Save()
 }
 
-func (account *UserAccount) AddRecent(id string) error {
-	account.RecentSuggestion = append([]string{id}, re)
+func (account *UserAccount) GetBookmarkContainer() (*BookmarkContainer, error) {
+	return FindBookmarkContainerId(account.BookmarkContainerId)
 }
 
 func (account *UserAccount) Save() error {
 	collection := db.GetDB().C("users")
-	return collection.Insert(account)
-}
-
-func (account *UserAccount) Update() error {
-	collection := db.GetDB().C("users")
-	return collection.UpdateId(account.Id, account)
+	_, err := collection.UpsertId(account.Id, account)
+	return err
 }
 
 func (account *UserAccount) Delete() error {

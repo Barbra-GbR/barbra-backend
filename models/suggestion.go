@@ -71,12 +71,8 @@ func SuggestionExists(id string) bool {
 	return count > 0 && err == nil
 }
 
-func (suggestion Suggestion) Save() error {
+func (suggestion *Suggestion) Save() error {
 	collection := db.GetDB().C("suggestions")
-	return collection.Insert(suggestion)
-}
-
-func (suggestion *Suggestion) Update() error {
-	collection := db.GetDB().C("suggestions")
-	return collection.UpdateId(suggestion.Id, suggestion)
+	_, err := collection.UpsertId(suggestion.Id, suggestion)
+	return err
 }

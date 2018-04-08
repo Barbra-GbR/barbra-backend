@@ -9,7 +9,6 @@ import (
 
 var (
 	ErrBookmarkExists   = errors.New("bookmark: already exists")
-	ErrBookmarkNotFound = errors.New("bookmark: bookmark not found")
 )
 
 type Bookmark struct {
@@ -18,71 +17,56 @@ type Bookmark struct {
 	SuggestionId string    `json:"suggestion_id" bson:"suggestion_id" validate:"hexadecimal" binding:"required"`
 }
 
-type BookmarkContainer struct {
-	Id           string   `json:"id"        bson:"_id"       validate:"hexadecimal" binding:"required"`
-	Bookmarks []*Bookmark `json:"bookmarks" bson:"bookmarks" binding:"required"`
-}
-
-func FindBookmarkContainerId(id string) (*BookmarkContainer, error) {
-	collection := db.GetDB().C("bookmarks")
-	container := new(BookmarkContainer)
-	err := collection.FindId(id).One(container)
-	return container, err
-}
-
-func NewContainer() *BookmarkContainer {
-	return &BookmarkContainer{
-		Id:bson.NewObjectId().Hex(),
-		Bookmarks:nil,
-	}
-}
-
-func (container *BookmarkContainer) AddBookmark(suggestionId string) error {
-	if _, ok := account.Bookmarks[suggestionId]; ok {
-		return ErrBookmarkExists
-	}
-
-	if !SuggestionExists(suggestionId) {
-		return ErrSuggestionNotFound
-	}
-
-	bookmark := NewBookmark(suggestionId)
-	account.Bookmarks[suggestionId] = bookmark
-	account.Update()
-
-	return nil
-}
-
-func (container *BookmarkContainer) RemoveBookmark(suggestionId string) error {
-	if _, ok := account.Bookmarks[suggestionId]; !ok {
-		return ErrBookmarkNotFound
-	}
-
-	delete(account.Bookmarks, suggestionId)
-	account.Update()
-
-	return nil
-}
-
-func (container *BookmarkContainer) Save() error {
-	collection := db.GetDB().C("bookmarks")
-	return collection.Insert(container)
-}
-
-func (container *BookmarkContainer) Update() error {
-	collection := db.GetDB().C("bookmarks")
-	return collection.UpdateId(container.Id, container)
-}
-
-func (container *BookmarkContainer) Delete() error {
-	collection := db.GetDB().C("bookmarks")
-	return collection.RemoveId(container.Id)
-}
-
-
 func NewBookmark(suggestionId string) *Bookmark {
 	return &Bookmark{
 		SuggestionId: suggestionId,
 		Creation:     time.Now(),
 	}
 }
+
+type BookmarkContainer struct {
+	Id string `json:"id"        bson:"_id"       validate:"hexadecimal" binding:"required"`
+}
+
+func NewBookmarkContainer() (*BookmarkContainer, error) {
+	collection := db.GetDB().C("bookmark_container")
+
+	container := &BookmarkContainer{
+		Id: bson.NewObjectId().Hex(),
+	}
+
+	return container, collection.Insert(bson.M{"_id": container.Id, "bookmarks": nil})
+}
+
+func FindBookmarkContainerId(id string) (*BookmarkContainer, error) {
+	collection := db.GetDB().C("bookmark_container")
+	container := new(BookmarkContainer)
+	err := collection.FindId(id).One(container)
+	return container, err
+}
+
+func (container *BookmarkContainer) AddBookmark(suggestionId string) error {
+	collection := db.GetDB().C("bookmark_container")
+
+	if !SuggestionExists(suggestionId) {
+		return ErrSuggestionNotFound
+	}
+
+	if container.ContainsBookmark(suggestionId) {
+		return ErrBookmarkExists
+	}
+
+	return collection.Update(container.Id, bson.M{"bookmarks": bson.M{"$push": NewBookmark(suggestionId)}})
+}
+
+func (container *BookmarkContainer) ContainsBookmark(suggestionId string) bool {
+	collection := db.GetDB().C("bookmark_container")
+	count, err := collection.Find(bson.M{"_id": container.Id, "bookmarks": bson.M{"$in": bson.M{"suggestionId": suggestionId}}}).Limit(1).Count()
+	return count == 1 && err == nil
+}
+
+func (container *BookmarkContainer) RemoveBookmark(suggestionId string) error {
+	collection := db.GetDB().C("bookmark_container")
+	return collection.Update(container.Id, bson.M{"bookmarks": bson.M{"$pull": bson.M{"suggestionId": suggestionId}}})
+}
+

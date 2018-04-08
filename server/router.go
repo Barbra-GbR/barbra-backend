@@ -45,7 +45,6 @@ func NewRouter() *gin.Engine {
 	enrolled.Handle(http.MethodGet, "/suggestion", suggestionController.GetSuggestions)
 	enrolled.Handle(http.MethodGet, "/suggestion/:id", suggestionController.GetSuggestion)
 
-	enrolled.Handle(http.MethodGet, "/user/me/bookmark", bookmarkController.GetUserBookmarks)
 	enrolled.Handle(http.MethodPost, "/user/me/bookmark", bookmarkController.AddUserBookmark)
 	enrolled.Handle(http.MethodDelete, "/user/me/bookmark", bookmarkController.RemoveUserBookmark)
 

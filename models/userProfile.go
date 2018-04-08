@@ -8,11 +8,13 @@ import (
 )
 
 type UserProfile struct {
-	Email      string `json:"email"       bson:"email,omitempty"       validate:"email,lowercase"              binding:"required"`
-	GivenName  string `json:"given_name"  bson:"given_name,omitempty"  validate:"alphaunicode,min=1,max=50"    binding:"required"`
-	FamilyName string `json:"family_name" bson:"family_name,omitempty" validate:"alphaunicode,min=1,max=50"    binding:"required"`
-	PictureURL string `json:"picture"     bson:"picture,omitempty"     validate:"url"                          binding:"required"`
-	Nickname   string `json:"nickname"    bson:"nickname,omitempty"    validate:"alphanumunicode,min=2,max=50" binding:"required"`
+	Email               string `json:"email"       bson:"email,omitempty"       validate:"email,lowercase"              binding:"required"`
+	GivenName           string `json:"given_name"  bson:"given_name,omitempty"  validate:"alphaunicode,min=1,max=50"    binding:"required"`
+	FamilyName          string `json:"family_name" bson:"family_name,omitempty" validate:"alphaunicode,min=1,max=50"    binding:"required"`
+	PictureURL          string `json:"picture"     bson:"picture,omitempty"     validate:"url"                          binding:"required"`
+
+	//TODO: Unique                                                     .
+	Nickname            string `json:"nickname"    bson:"nickname,omitempty"    validate:"alphanumunicode,min=2,max=50" binding:"required"`
 }
 
 func (profile *UserProfile) UpdateInfo(payload *payloads.ProfilePayload) error {
