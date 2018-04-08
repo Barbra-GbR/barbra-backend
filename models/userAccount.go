@@ -15,10 +15,11 @@ var (
 )
 
 type UserAccount struct {
-	Id        string               `json:"id"        bson:"_id"      validate:"hexadecimal" binding:"required"`
-	Enrolled  bool                 `json:"enrolled"  bson:"enrolled"                        binding:"required"`
-	Profile   *UserProfile         `json:"-"         bson:"profile"                         binding:"required"`
-	Bookmarks map[string]*Bookmark `json:"-"         bson:"bookmarks"                       binding:"required"`
+	Id               string               `json:"id"        bson:"_id"                        validate:"hexadecimal" binding:"required"`
+	Enrolled         bool                 `json:"enrolled"  bson:"enrolled"                                          binding:"required"`
+	Profile          *UserProfile         `json:"-"         bson:"profile"                                           binding:"required"`
+	Bookmarks        map[string]*Bookmark `json:"-"         bson:"bookmarks"                                         binding:"required"`
+	RecentSuggestion []string             `json:"-"         bson:"recent_suggestion,omitempty"`
 }
 
 func GetUserAccount(id string) (*UserAccount, error) {
@@ -86,6 +87,9 @@ func (account *UserAccount) UpdateProfile(payload *payloads.ProfilePayload) erro
 	return account.Update()
 }
 
+func (account *UserAccount) AddRecent(id string) error {
+	account.RecentSuggestion = append([]string{id}, re)
+}
 
 func (account *UserAccount) Save() error {
 	collection := db.GetDB().C("users")
