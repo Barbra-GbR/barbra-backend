@@ -5,8 +5,8 @@ import (
 	"gopkg.in/mgo.v2"
 	"golang.org/x/oauth2"
 	"github.com/coreos/go-oidc"
-	"github.com/bitphinix/barbra_backend/config"
-	"github.com/bitphinix/barbra_backend/models"
+	"github.com/bitphinix/barbra-backend/config"
+	"github.com/bitphinix/barbra-backend/models"
 )
 
 var (

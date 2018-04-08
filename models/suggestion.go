@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/bitphinix/barbra_backend/db"
+	"github.com/bitphinix/barbra-backend/db"
 	"gopkg.in/mgo.v2/bson"
 	"gopkg.in/mgo.v2"
 	"errors"

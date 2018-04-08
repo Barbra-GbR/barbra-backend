@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 	"errors"
-	"github.com/bitphinix/barbra_backend/db"
+	"github.com/bitphinix/barbra-backend/db"
 	"gopkg.in/mgo.v2/bson"
 )
 

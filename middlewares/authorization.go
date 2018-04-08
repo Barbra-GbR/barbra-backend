@@ -3,9 +3,9 @@ package middlewares
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"github.com/bitphinix/barbra_backend/auth"
-	"github.com/bitphinix/barbra_backend/models"
-	"github.com/bitphinix/barbra_backend/controller"
+	"github.com/bitphinix/barbra-backend/auth"
+	"github.com/bitphinix/barbra-backend/models"
+	"github.com/bitphinix/barbra-backend/controller"
 )
 
 func AuthorizationMiddleware(enrolledOnly bool) func(c*gin.Context) {

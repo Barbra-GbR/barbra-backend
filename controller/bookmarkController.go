@@ -2,9 +2,9 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/bitphinix/barbra_backend/payloads"
+	"github.com/bitphinix/barbra-backend/payloads"
 	"net/http"
-	"github.com/bitphinix/barbra_backend/models"
+	"github.com/bitphinix/barbra-backend/models"
 	"log"
 )
 

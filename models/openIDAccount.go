@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/bitphinix/barbra_backend/db"
+	"github.com/bitphinix/barbra-backend/db"
 )
 
 type OpenIdAccount struct {
