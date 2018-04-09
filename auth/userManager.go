@@ -131,6 +131,6 @@ func (UserManager) FindAccount(providerId string, oidToken *oidc.IDToken) (*mode
 		return nil, err
 	}
 
-	account, err := models.GetUserAccount(oidAccount.Owner)
+	account, err := models.GetUserAccount(oidAccount.OwnerId)
 	return account, err
 }

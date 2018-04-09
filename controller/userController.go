@@ -18,15 +18,6 @@ func (UserController) GetAccount(c *gin.Context) {
 	c.JSON(http.StatusOK, account)
 }
 
-func (UserController) GetProfile(c *gin.Context) {
-	account, err := GetCurrentAccount(c)
-	if err != nil {
-		return
-	}
-
-	c.JSON(http.StatusOK, account.Profile)
-}
-
 func (UserController) UpdateProfile(c *gin.Context) {
 	payload := new(payloads.ProfilePayload)
 	err := c.BindJSON(payload)

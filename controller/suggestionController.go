@@ -49,7 +49,7 @@ func (SuggestionController) GetSuggestion(c *gin.Context) {
 		return
 	}
 
-	suggestion, err := models.FindSuggestionById(id)
+	suggestion, err := models.FindSuggestionById(bson.ObjectIdHex(id))
 
 	if err != nil {
 		c.AbortWithStatus(http.StatusNotFound)

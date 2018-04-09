@@ -12,19 +12,19 @@ var (
 )
 
 type Suggestion struct {
-	Provider string   `json:"provider" bson:"provider" binding:"required"`
-	Url      string   `json:"url"      bson:"url"      binding:"required"`
-	Kind     string   `json:"kind"     bson:"kind"     binding:"required"`
-	Title    string   `json:"title"    bson:"title"    binding:"required"`
-	Category string   `json:"category" bson:"category" binding:"required"`
-	Tags     []string `json:"tags"     bson:"tags"     binding:"required"`
-	Content  string   `json:"content"  bson:"content"  binding:"required"`
-	Id       string   `json:"id"       bson:"_id"      binding:"required"`
+	Provider string        `json:"provider" bson:"provider" binding:"required"`
+	Url      string        `json:"url"      bson:"url"      binding:"required"`
+	Kind     string        `json:"kind"     bson:"kind"     binding:"required"`
+	Title    string        `json:"title"    bson:"title"    binding:"required"`
+	Category string        `json:"category" bson:"category" binding:"required"`
+	Tags     []string      `json:"tags"     bson:"tags"     binding:"required"`
+	Content  string        `json:"content"  bson:"content"  binding:"required"`
+	Id       bson.ObjectId `json:"id"       bson:"_id"      binding:"required"`
 }
 
 func NewSuggestion(url string, kind string, title string, category string, provider string, tags []string, content string) *Suggestion {
 	return &Suggestion{
-		Id:       bson.NewObjectId().Hex(),
+		Id:       bson.NewObjectId(),
 		Content:  content,
 		Kind:     kind,
 		Tags:     tags,
@@ -57,7 +57,7 @@ func GetSuggestion(url string, kind string, title string, provider string, categ
 	return suggestion, err
 }
 
-func FindSuggestionById(id string) (*Suggestion, error) {
+func FindSuggestionById(id bson.ObjectId) (*Suggestion, error) {
 	collection := db.GetDB().C("suggestions")
 
 	suggestion := new(Suggestion)
@@ -65,7 +65,7 @@ func FindSuggestionById(id string) (*Suggestion, error) {
 	return suggestion, err
 }
 
-func SuggestionExists(id string) bool {
+func SuggestionExists(id bson.ObjectId) bool {
 	collection := db.GetDB().C("suggestions")
 	count, err := collection.FindId(id).Count()
 	return count > 0 && err == nil

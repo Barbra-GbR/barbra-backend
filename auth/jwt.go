@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"github.com/bitphinix/barbra-backend/config"
+	"gopkg.in/mgo.v2/bson"
 )
 
 var (
@@ -42,11 +43,11 @@ func InitJWT() {
 	jwtHandler = j
 }
 
-func (j *JWT) GenerateToken(accountId string) (string, error) {
+func (j *JWT) GenerateToken(accountId bson.ObjectId) (string, error) {
 	now := time.Now()
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		Subject:   accountId,
+		Subject:   accountId.Hex(),
 		Issuer:    j.issuer,
 		ExpiresAt: now.Add(time.Hour * 24 * 30).Unix(),
 		IssuedAt:  now.Unix(),
@@ -90,8 +91,8 @@ func (j *JWT) GetUserId(tokenString string) (string, error) {
 	return claims.Subject, nil
 }
 
-func (j *JWT) NewTokenId(accountId string) string {
+func (j *JWT) NewTokenId(accountId bson.ObjectId) string {
 	m := md5.New()
-	m.Write([]byte(accountId + ":" + time.Now().String() + ":" + string(j.idCount)))
+	m.Write([]byte(accountId.Hex() + ":" + time.Now().String() + ":" + string(j.idCount)))
 	return hex.EncodeToString(m.Sum(nil))
 }

@@ -15,13 +15,13 @@ var (
 )
 
 type UserAccount struct {
-	Id                  string               `json:"id"        bson:"_id"                          validate:"hexadecimal" binding:"required"`
-	Enrolled            bool                 `json:"enrolled"  bson:"enrolled"                                            binding:"required"`
-	Profile             *UserProfile         `json:"-"         bson:"profile"                                             binding:"required"`
-	BookmarkContainerId string               `json:"-"         bson:"bookmark_container_id"        validate:"hexadecimal" binding:"required"`
+	Id                  bson.ObjectId `json:"id"       bson:"_id"                   binding:"required"`
+	Enrolled            bool          `json:"enrolled" bson:"enrolled"              binding:"required"`
+	Profile             *UserProfile  `json:"profile"  bson:"profile"               binding:"required"`
+	BookmarkContainerId bson.ObjectId `json:"-"        bson:"bookmark_container_id" binding:"required"`
 }
 
-func GetUserAccount(id string) (*UserAccount, error) {
+func GetUserAccount(id bson.ObjectId) (*UserAccount, error) {
 	collection := db.GetDB().C("users")
 
 	account := new(UserAccount)
@@ -53,13 +53,12 @@ func RegisterUser(payload *payloads.ProfilePayload) (*UserAccount, error) {
 	}
 
 	bookmarkContainer, err := NewBookmarkContainer()
-
 	if err != nil {
 		return nil, err
 	}
 
 	account := &UserAccount{
-		Id:       bson.NewObjectId().Hex(),
+		Id:       bson.NewObjectId(),
 		Enrolled: false,
 		Profile: &UserProfile{
 			Email:      payload.Email,

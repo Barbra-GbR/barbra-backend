@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"github.com/bitphinix/barbra-backend/models"
 	"log"
+	"gopkg.in/mgo.v2/bson"
 )
 
 type BookmarkController struct{}
@@ -14,7 +15,7 @@ func (BookmarkController) AddUserBookmark(c *gin.Context) {
 	payload := new(payloads.BookmarkPayload)
 	err := c.BindJSON(payload)
 
-	if err != nil {
+	if err != nil || !bson.IsObjectIdHex(payload.SuggestionId) {
 		Error(c, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -31,7 +32,7 @@ func (BookmarkController) AddUserBookmark(c *gin.Context) {
 		return
 	}
 
-	err = container.AddBookmark(payload.SuggestionId)
+	err = container.AddBookmark(bson.ObjectIdHex(payload.SuggestionId))
 
 	if err == models.ErrSuggestionNotFound {
 		Error(c, http.StatusUnprocessableEntity, "no suggestion with id")
@@ -53,7 +54,7 @@ func (BookmarkController) RemoveUserBookmark(c *gin.Context) {
 	payload := new(payloads.BookmarkPayload)
 	err := c.BindJSON(payload)
 
-	if err != nil {
+	if err != nil || !bson.IsObjectIdHex(payload.SuggestionId) {
 		Error(c, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -69,7 +70,7 @@ func (BookmarkController) RemoveUserBookmark(c *gin.Context) {
 		return
 	}
 
-	err = container.RemoveBookmark(payload.SuggestionId)
+	err = container.RemoveBookmark(bson.ObjectIdHex(payload.SuggestionId))
 
 	if err == models.ErrSuggestionNotFound {
 		Error(c, http.StatusUnprocessableEntity, "no bookmark with id")

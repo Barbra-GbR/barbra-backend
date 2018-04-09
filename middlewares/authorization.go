@@ -6,6 +6,7 @@ import (
 	"github.com/bitphinix/barbra-backend/auth"
 	"github.com/bitphinix/barbra-backend/models"
 	"github.com/bitphinix/barbra-backend/controller"
+	"gopkg.in/mgo.v2/bson"
 )
 
 func AuthorizationMiddleware(enrolledOnly bool) func(c*gin.Context) {
@@ -20,14 +21,14 @@ func AuthorizationMiddleware(enrolledOnly bool) func(c*gin.Context) {
 		jwt := auth.GetJWT()
 		accountId, err := jwt.GetUserId(tokenString)
 
-		if err != nil {
+		if err != nil || !bson.IsObjectIdHex(accountId) {
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
 
-		account, err := models.GetUserAccount(accountId)
+		account, err := models.GetUserAccount(bson.ObjectIdHex(accountId))
 		if err != nil {
-			c.AbortWithStatus(http.StatusInternalServerError)
+			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
 

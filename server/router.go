@@ -35,8 +35,7 @@ func NewRouter() *gin.Engine {
 	private.Use(middlewares.AuthorizationMiddleware(false))
 
 	private.Handle(http.MethodGet, "/user/me", userController.GetAccount)
-	private.Handle(http.MethodPut, "/user/me/profile", userController.UpdateProfile)
-	private.Handle(http.MethodGet, "/user/me/profile", userController.GetProfile)
+	private.Handle(http.MethodPut, "/user/me", userController.UpdateProfile)
 
 	//Private routes (enrolled accounts only)
 	enrolled := router.Group("/api/v1")

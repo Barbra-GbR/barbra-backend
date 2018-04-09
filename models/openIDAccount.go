@@ -2,13 +2,14 @@ package models
 
 import (
 	"github.com/bitphinix/barbra-backend/db"
+	"gopkg.in/mgo.v2/bson"
 )
 
 type OpenIdAccount struct {
-	Id       string `json:"id" bson:"_id"`
-	Provider string `json:"provider" bson:"provider"`
-	Sub      string `json:"sub" bson:"sub"`
-	Owner    string `json:"owner" bson:"owner"`
+	Id       string        `json:"id" bson:"_id"`
+	Provider string        `json:"provider" bson:"provider"`
+	Sub      string        `json:"sub" bson:"sub"`
+	OwnerId  bson.ObjectId `json:"owner" bson:"owner"`
 }
 
 func FindOIdAccount(provider string, sub string) (*OpenIdAccount, error) {
@@ -19,12 +20,12 @@ func FindOIdAccount(provider string, sub string) (*OpenIdAccount, error) {
 	return account, err
 }
 
-func RegisterOIdAccount(provider string, sub string, owner string) (*OpenIdAccount, error) {
+func RegisterOIdAccount(provider string, sub string, ownerId bson.ObjectId) (*OpenIdAccount, error) {
 	account := &OpenIdAccount{
 		Provider: provider,
 		Sub:      sub,
 		Id:       getOIdAccountId(provider, sub),
-		Owner:    owner,
+		OwnerId:  ownerId,
 	}
 
 	err := account.Save()
