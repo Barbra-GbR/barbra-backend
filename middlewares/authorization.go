@@ -3,9 +3,9 @@ package middlewares
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"github.com/bitphinix/barbra-backend/auth"
-	"github.com/bitphinix/barbra-backend/models"
-	"github.com/bitphinix/barbra-backend/controller"
+	"github.com/Barbra-GbR/barbra-backend/auth"
+	"github.com/Barbra-GbR/barbra-backend/models"
+	"github.com/Barbra-GbR/barbra-backend/controller"
 	"gopkg.in/mgo.v2/bson"
 )
 

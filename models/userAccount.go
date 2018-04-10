@@ -3,9 +3,9 @@ package models
 import (
 	"gopkg.in/mgo.v2/bson"
 	"errors"
-	"github.com/bitphinix/barbra-backend/db"
-	"github.com/bitphinix/barbra-backend/helpers"
-	"github.com/bitphinix/barbra-backend/payloads"
+	"github.com/Barbra-GbR/barbra-backend/db"
+	"github.com/Barbra-GbR/barbra-backend/helpers"
+	"github.com/Barbra-GbR/barbra-backend/payloads"
 	"log"
 )
 

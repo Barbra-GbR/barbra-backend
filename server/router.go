@@ -4,9 +4,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"github.com/gin-contrib/sessions"
-	"github.com/bitphinix/barbra-backend/config"
-	"github.com/bitphinix/barbra-backend/controller"
-	"github.com/bitphinix/barbra-backend/middlewares"
+	"github.com/Barbra-GbR/barbra-backend/config"
+	"github.com/Barbra-GbR/barbra-backend/controller"
+	"github.com/Barbra-GbR/barbra-backend/middlewares"
 )
 
 func NewRouter() *gin.Engine {

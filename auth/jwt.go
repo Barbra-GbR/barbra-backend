@@ -6,7 +6,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"errors"
-	"github.com/bitphinix/barbra-backend/config"
+	"github.com/Barbra-GbR/barbra-backend/config"
 	"gopkg.in/mgo.v2/bson"
 )
 

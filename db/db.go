@@ -4,7 +4,7 @@ import (
 	"gopkg.in/mgo.v2"
 	"time"
 	"log"
-	"github.com/bitphinix/barbra-backend/config"
+	"github.com/Barbra-GbR/barbra-backend/config"
 )
 
 var db *mgo.Database

@@ -4,9 +4,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"github.com/gin-contrib/sessions"
-	"github.com/bitphinix/barbra-backend/models"
-	"github.com/bitphinix/barbra-backend/helpers"
-	"github.com/bitphinix/barbra-backend/auth"
+	"github.com/Barbra-GbR/barbra-backend/models"
+	"github.com/Barbra-GbR/barbra-backend/helpers"
+	"github.com/Barbra-GbR/barbra-backend/auth"
 )
 
 type LoginController struct{}

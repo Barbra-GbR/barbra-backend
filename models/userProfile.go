@@ -1,10 +1,10 @@
 package models
 
 import (
-	"github.com/bitphinix/barbra-backend/payloads"
-	"github.com/bitphinix/barbra-backend/db"
+	"github.com/Barbra-GbR/barbra-backend/payloads"
+	"github.com/Barbra-GbR/barbra-backend/db"
 	"gopkg.in/mgo.v2/bson"
-	"github.com/bitphinix/barbra-backend/helpers"
+	"github.com/Barbra-GbR/barbra-backend/helpers"
 )
 
 type UserProfile struct {

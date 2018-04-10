@@ -3,8 +3,8 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"github.com/bitphinix/barbra-backend/models"
-	"github.com/bitphinix/barbra-backend/payloads"
+	"github.com/Barbra-GbR/barbra-backend/models"
+	"github.com/Barbra-GbR/barbra-backend/payloads"
 )
 
 type UserController struct{}

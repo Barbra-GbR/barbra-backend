@@ -2,9 +2,9 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/bitphinix/barbra-backend/payloads"
+	"github.com/Barbra-GbR/barbra-backend/payloads"
 	"net/http"
-	"github.com/bitphinix/barbra-backend/models"
+	"github.com/Barbra-GbR/barbra-backend/models"
 	"log"
 	"gopkg.in/mgo.v2/bson"
 )

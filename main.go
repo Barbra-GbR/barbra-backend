@@ -4,11 +4,11 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"github.com/bitphinix/barbra-backend/db"
-	"github.com/bitphinix/barbra-backend/server"
-	"github.com/bitphinix/barbra-backend/config"
-	"github.com/bitphinix/barbra-backend/auth"
-	"github.com/bitphinix/barbra-backend/helpers"
+	"github.com/Barbra-GbR/barbra-backend/db"
+	"github.com/Barbra-GbR/barbra-backend/server"
+	"github.com/Barbra-GbR/barbra-backend/config"
+	"github.com/Barbra-GbR/barbra-backend/auth"
+	"github.com/Barbra-GbR/barbra-backend/helpers"
 )
 
 func main() {

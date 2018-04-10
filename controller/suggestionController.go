@@ -3,7 +3,7 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"github.com/bitphinix/barbra-backend/models"
+	"github.com/Barbra-GbR/barbra-backend/models"
 	"gopkg.in/mgo.v2/bson"
 )
 

@@ -8,8 +8,8 @@ import (
 	"errors"
 	"encoding/base64"
 	"crypto/rand"
-	"github.com/bitphinix/barbra-backend/config"
-	"github.com/bitphinix/barbra-backend/payloads"
+	"github.com/Barbra-GbR/barbra-backend/config"
+	"github.com/Barbra-GbR/barbra-backend/payloads"
 )
 
 var (

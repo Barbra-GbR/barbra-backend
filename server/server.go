@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/bitphinix/barbra-backend/config"
+	"github.com/Barbra-GbR/barbra-backend/config"
 )
 
 func Init() {
