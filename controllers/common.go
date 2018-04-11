@@ -1,4 +1,4 @@
-package controller
+package controllers
 
 import (
 	"github.com/gin-gonic/gin"
@@ -9,14 +9,16 @@ import (
 )
 
 var (
-	ErrContextNotSet = errors.New("common: context not set")
+	ErrContextNotSet = errors.New("context not set")
 )
 
+//Aborts the current context and sends the error serialised to the client
 func Error(c *gin.Context, code int, message string) {
 	c.JSON(code, helpers.M{"error": message})
 	c.Abort()
 }
 
+//Returns the user set from the authenticationMiddleware
 func GetCurrentAccount(c *gin.Context) (*models.UserAccount, error) {
 	accountInterface, ok := c.Get("user_account")
 	if !ok {

@@ -15,64 +15,67 @@ var (
 	ErrUnexpectedSigningMethod = errors.New("jwt: unexpected signing method")
 	ErrTokenInvalid            = errors.New("jwt: invalid token")
 	ErrTokenExpired            = errors.New("jwt: token expired")
-	jwtHandler                 *JWT
+	jwtManager                 *JWTManager
 )
 
-type JWT struct {
+//Provides tools to validate jwt tokens and retrieve and getting corresponding accounts
+type JWTManager struct {
 	secret  []byte
 	issuer  string
 	idCount int64
 }
 
-func GetJWT() *JWT {
-	return jwtHandler
+//Returns the initialized JWT. Do not call before calling InitializeAccountManager!
+func GetJWT() *JWTManager {
+	return jwtManager
 }
 
-func InitJWT() {
+//Initialises the JWTManager with data from the config
+func InitializeJWT() {
 	c := config.GetConfig()
 
-	j := new(JWT)
+	j := new(JWTManager)
 	j.secret = []byte(c.GetString("server.jwt_secret"))
 	j.issuer = c.GetString("server.host")
 	j.idCount = 0
-
 	if len(j.secret) < 10 {
 		panic(ErrSecretInvalid)
 	}
 
-	jwtHandler = j
+	jwtManager = j
 }
 
-func (j *JWT) GenerateToken(accountId bson.ObjectId) (string, error) {
+//Generates a new JWT for the given information
+func (manager *JWTManager) GenerateToken(accountId bson.ObjectId) (string, error) {
 	now := time.Now()
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
 		Subject:   accountId.Hex(),
-		Issuer:    j.issuer,
+		Issuer:    manager.issuer,
 		ExpiresAt: now.Add(time.Hour * 24 * 30).Unix(),
 		IssuedAt:  now.Unix(),
-		Audience:  j.issuer,
+		Audience:  manager.issuer,
 		NotBefore: now.Unix(),
-		Id:        j.NewTokenId(accountId),
+		Id:        manager.NewTokenId(accountId),
 	})
 
-	return token.SignedString(j.secret)
+	return token.SignedString(manager.secret)
 }
 
-func (j *JWT) GetUserId(tokenString string) (string, error) {
+//Validates the token and returns the corresponding userAccount
+func (manager *JWTManager) GetAccountId(tokenString string) (string, error) {
 	claims := new(jwt.StandardClaims)
+
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, ErrUnexpectedSigningMethod
 		}
 
-		return j.secret, nil
+		return manager.secret, nil
 	})
-
 	if err != nil {
 		return "", err
 	}
-
 	if !token.Valid {
 		return "", ErrTokenInvalid
 	}
@@ -83,7 +86,6 @@ func (j *JWT) GetUserId(tokenString string) (string, error) {
 	if claims.NotBefore >= now || claims.Audience != j.issuer {
 		return "", ErrTokenInvalid
 	}
-
 	if claims.ExpiresAt <= now {
 		return "", ErrTokenExpired
 	}
@@ -91,7 +93,8 @@ func (j *JWT) GetUserId(tokenString string) (string, error) {
 	return claims.Subject, nil
 }
 
-func (j *JWT) NewTokenId(accountId bson.ObjectId) string {
+//Generates a new TokenId for use within JWTs
+func (manager *JWTManager) NewTokenId(accountId bson.ObjectId) string {
 	m := md5.New()
 	m.Write([]byte(accountId.Hex() + ":" + time.Now().String() + ":" + string(j.idCount)))
 	return hex.EncodeToString(m.Sum(nil))

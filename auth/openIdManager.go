@@ -10,42 +10,44 @@ import (
 )
 
 var (
-	ErrProviderAlreadyRegistered = errors.New("openIdProvider: Provider is already registered")
-	ErrClientNotFound            = errors.New("openIdProvider: No client with the specified providerId registered")
-	userManager                  *UserManager
+	ErrProviderAlreadyRegistered = errors.New("provider is already registered")
+	ErrClientNotFound            = errors.New("no client with the specified providerId registered")
+	accountManager               *OpenIdManager
 )
 
-type UserManager struct {
+//Provides tools for registering and finding users with OpenId, OAuth2 tokens
+type OpenIdManager struct {
 	oidClients map[string]*OpenIdClient
 }
 
-func GetUserManager() *UserManager {
-	return userManager
+//Returns the initialized OpenIdManager. Do not call before calling InitializeAccountManager!
+func GetAccountManager() *OpenIdManager {
+	return accountManager
 }
 
-func InitUserManager() {
+//Initialises the OpenIdManager with data from the config
+func InitializeAccountManager() {
 	c := config.GetConfig()
-	manager := new(UserManager)
+	manager := new(OpenIdManager)
 	manager.oidClients = make(map[string]*OpenIdClient)
 
 	for providerId := range c.GetStringMap("auth") {
 		err := manager.LoadOIdProvider(providerId)
-
 		if err != nil {
 			panic(err)
 		}
 	}
 
-	userManager = manager
+	accountManager = manager
 }
 
-func (manager *UserManager) LoadOIdProvider(providerId string) error {
+//Loads the OIdProvider with the corresponding providerId out of the config
+func (manager *OpenIdManager) LoadOIdProvider(providerId string) error {
 	if _, ok := manager.oidClients[providerId]; ok {
 		return ErrProviderAlreadyRegistered
 	}
 
 	client, err := LoadOpenIdClient(providerId)
-
 	if err != nil {
 		return err
 	}
@@ -54,7 +56,8 @@ func (manager *UserManager) LoadOIdProvider(providerId string) error {
 	return nil
 }
 
-func (manager *UserManager) GetOIdClient(providerId string) (*OpenIdClient, error) {
+//Returns the OIdClient with the given providerId
+func (manager *OpenIdManager) GetOIdClient(providerId string) (*OpenIdClient, error) {
 	var client *OpenIdClient
 	var ok bool
 
@@ -65,7 +68,8 @@ func (manager *UserManager) GetOIdClient(providerId string) (*OpenIdClient, erro
 	return client, nil
 }
 
-func (manager *UserManager) GenerateLoginUrl(providerId string, state string) (string, error) {
+//Generates a new login url with the given state
+func (manager *OpenIdManager) GenerateLoginUrl(providerId string, state string) (string, error) {
 	client, err := manager.GetOIdClient(providerId)
 	if err != nil {
 		return "", err
@@ -74,7 +78,8 @@ func (manager *UserManager) GenerateLoginUrl(providerId string, state string) (s
 	return client.GenerateLoginURL(state), nil
 }
 
-func (manager *UserManager) GetAccount(providerId string, code string) (*models.UserAccount, error) {
+//Redeems the oauth code and try's to find the belonging UserAccount. If no account was found, a new one will be registered
+func (manager *OpenIdManager) GetAccount(providerId string, code string) (*models.UserAccount, error) {
 	client, err := manager.GetOIdClient(providerId)
 	if err != nil {
 		return nil, err
@@ -90,7 +95,7 @@ func (manager *UserManager) GetAccount(providerId string, code string) (*models.
 		return nil, err
 	}
 
-	account, err := manager.FindAccount(providerId, oidToken)
+	account, err := manager.GetAccountByIdToken(providerId, oidToken)
 	if err != mgo.ErrNotFound {
 		return account, err
 	}
@@ -98,7 +103,8 @@ func (manager *UserManager) GetAccount(providerId string, code string) (*models.
 	return manager.RegisterAccount(providerId, oauthToken, oidToken)
 }
 
-func (manager *UserManager) RegisterAccount(providerId string, oauth2Token *oauth2.Token, oidToken *oidc.IDToken) (*models.UserAccount, error) {
+//Registers a new UserAccount by fetching data with the oauth2Token and the oidToken
+func (manager *OpenIdManager) RegisterAccount(providerId string, oauth2Token *oauth2.Token, oidToken *oidc.IDToken) (*models.UserAccount, error) {
 	client, err := manager.GetOIdClient(providerId)
 	if err != nil {
 		return nil, err
@@ -115,17 +121,16 @@ func (manager *UserManager) RegisterAccount(providerId string, oauth2Token *oaut
 	}
 
 	_, err = models.RegisterOIdAccount(providerId, oidToken.Subject, account.Id)
-
 	if err != nil {
 		_ = account.Delete()
-
 		return nil, err
 	}
 
 	return account, nil
 }
 
-func (UserManager) FindAccount(providerId string, oidToken *oidc.IDToken) (*models.UserAccount, error) {
+//Try's to find a UserAccount with the give providerId and oidToken
+func (manager *OpenIdManager) GetAccountByIdToken(providerId string, oidToken *oidc.IDToken) (*models.UserAccount, error) {
 	oidAccount, err := models.FindOIdAccount(providerId, oidToken.Subject)
 	if err != nil {
 		return nil, err

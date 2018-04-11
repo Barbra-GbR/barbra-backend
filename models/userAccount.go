@@ -92,7 +92,7 @@ func (account *UserAccount) UpdateProfile(payload *payloads.ProfilePayload) erro
 }
 
 func (account *UserAccount) GetBookmarkContainer() (*BookmarkContainer, error) {
-	return FindBookmarkContainerId(account.BookmarkContainerId)
+	return GetBookmarkContainerById(account.BookmarkContainerId)
 }
 
 func (account *UserAccount) Save() error {

@@ -1,4 +1,4 @@
-package controller
+package controllers
 
 import (
 	"github.com/gin-gonic/gin"
@@ -7,6 +7,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+//Provides an webInterface for generating and managing suggestions
 type SuggestionController struct{}
 
 func (SuggestionController) GetSuggestions(c *gin.Context) {
@@ -41,16 +42,15 @@ func (SuggestionController) GetSuggestions(c *gin.Context) {
 	c.JSON(http.StatusOK, []*models.Suggestion{dummyArticle1, dummyArticle2, dummyArticle3})
 }
 
+//Returns the suggestion with the specified id
 func (SuggestionController) GetSuggestion(c *gin.Context) {
 	id := c.Param("id")
-
 	if !bson.IsObjectIdHex(id) {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
 
-	suggestion, err := models.FindSuggestionById(bson.ObjectIdHex(id))
-
+	suggestion, err := models.GetSuggestionById(bson.ObjectIdHex(id))
 	if err != nil {
 		c.AbortWithStatus(http.StatusNotFound)
 		return

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"github.com/gin-contrib/sessions"
 	"github.com/Barbra-GbR/barbra-backend/config"
-	"github.com/Barbra-GbR/barbra-backend/controller"
+	"github.com/Barbra-GbR/barbra-backend/controllers"
 	"github.com/Barbra-GbR/barbra-backend/middlewares"
 )
 
@@ -19,31 +19,36 @@ func NewRouter() *gin.Engine {
 	store := sessions.NewCookieStore([]byte(c.GetString("server.cookie_store_secret")))
 	router.Use(sessions.Sessions("login_session", store))
 
-	//Controller
-	loginController := new(controller.LoginController)
-	userController := new(controller.UserController)
-	suggestionController := new(controller.SuggestionController)
-	bookmarkController := new(controller.BookmarkController)
+	//Controllers
+	authenticationController := new(controllers.AuthenticationController)
+	userController := new(controllers.UserController)
+	suggestionController := new(controllers.SuggestionController)
+	bookmarkController := new(controllers.BookmarkController)
 
-	//Public routes
+	//----------------------------------------- Public routes -----------------------------------------
 	public := router.Group("/api/v1/")
-	public.Handle(http.MethodGet, "/login/:provider/callback", loginController.AuthCallback)
-	public.Handle(http.MethodGet, "/login/:provider", loginController.Auth)
 
-	//Private routes
+	//Authentication
+	public.Handle(http.MethodGet, "/login/:provider/callback", authenticationController.AuthenticationCallback)
+	public.Handle(http.MethodGet, "/login/:provider", authenticationController.Authenticate)
+
+	//----------------------------------------- Private routes -----------------------------------------
 	private := router.Group("/api/v1")
 	private.Use(middlewares.AuthorizationMiddleware(false))
 
+	//User profile
 	private.Handle(http.MethodGet, "/user/me", userController.GetAccount)
 	private.Handle(http.MethodPut, "/user/me", userController.UpdateProfile)
 
-	//Private routes (enrolled accounts only)
+	//----------------------------- Private routes (enrolled accounts only) -----------------------------
 	enrolled := router.Group("/api/v1")
 	enrolled.Use(middlewares.AuthorizationMiddleware(true))
 
+	//Suggestions
 	enrolled.Handle(http.MethodGet, "/suggestion", suggestionController.GetSuggestions)
 	enrolled.Handle(http.MethodGet, "/suggestion/:id", suggestionController.GetSuggestion)
 
+	//Bookmarks
 	enrolled.Handle(http.MethodPost, "/user/me/bookmark", bookmarkController.AddUserBookmark)
 	enrolled.Handle(http.MethodDelete, "/user/me/bookmark", bookmarkController.RemoveUserBookmark)
 

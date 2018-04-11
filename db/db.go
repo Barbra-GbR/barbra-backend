@@ -9,7 +9,8 @@ import (
 
 var db *mgo.Database
 
-func Init() {
+//Initializes the database-connection with the data specified in the config
+func Initialize() {
 	c := config.GetConfig()
 
 	session, err := mgo.DialWithInfo(
@@ -20,7 +21,6 @@ func Init() {
 			Password: c.GetString("mongodb.password"),
 		},
 	)
-
 	if err != nil {
 		log.Fatal("Unable to connect to database:", err)
 	}
@@ -28,6 +28,7 @@ func Init() {
 	db = session.DB(c.GetString("database_name"))
 }
 
+//Returns the initialized Database. Do not call before calling Initialize!
 func GetDB() *mgo.Database {
 	return db
 }

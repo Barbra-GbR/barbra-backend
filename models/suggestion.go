@@ -57,7 +57,7 @@ func GetSuggestion(url string, kind string, title string, provider string, categ
 	return suggestion, err
 }
 
-func FindSuggestionById(id bson.ObjectId) (*Suggestion, error) {
+func GetSuggestionById(id bson.ObjectId) (*Suggestion, error) {
 	collection := db.GetDB().C("suggestions")
 
 	suggestion := new(Suggestion)
