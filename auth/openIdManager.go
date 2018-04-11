@@ -136,6 +136,6 @@ func (manager *OpenIdManager) GetAccountByIdToken(providerId string, oidToken *o
 		return nil, err
 	}
 
-	account, err := models.GetUserAccount(oidAccount.OwnerId)
+	account, err := models.GetUserAccountById(oidAccount.OwnerId)
 	return account, err
 }

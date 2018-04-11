@@ -11,6 +11,7 @@ var (
 	ErrSuggestionNotFound = errors.New("suggestion: not found")
 )
 
+//A Suggestion model
 type Suggestion struct {
 	Provider string        `json:"provider" bson:"provider" binding:"required"`
 	Url      string        `json:"url"      bson:"url"      binding:"required"`
@@ -22,6 +23,7 @@ type Suggestion struct {
 	Id       bson.ObjectId `json:"id"       bson:"_id"      binding:"required"`
 }
 
+//Creates a new suggestion with the specified data
 func NewSuggestion(url string, kind string, title string, category string, provider string, tags []string, content string) *Suggestion {
 	return &Suggestion{
 		Id:       bson.NewObjectId(),
@@ -35,6 +37,7 @@ func NewSuggestion(url string, kind string, title string, category string, provi
 	}
 }
 
+//Searches for the suggestion in the database, if no matches are found a new one will be created
 func GetSuggestion(url string, kind string, title string, provider string, category string, tags []string, content string) (*Suggestion, error) {
 	collection := db.GetDB().C("suggestions")
 
@@ -48,7 +51,6 @@ func GetSuggestion(url string, kind string, title string, provider string, categ
 		"content":  content,
 		"provider": provider,
 	}).One(suggestion)
-
 	if err == mgo.ErrNotFound {
 		suggestion = NewSuggestion(url, kind, title, category, provider, tags, content)
 		err = suggestion.Save()
@@ -57,6 +59,7 @@ func GetSuggestion(url string, kind string, title string, provider string, categ
 	return suggestion, err
 }
 
+//Returns the suggestion with the matching id
 func GetSuggestionById(id bson.ObjectId) (*Suggestion, error) {
 	collection := db.GetDB().C("suggestions")
 
@@ -65,12 +68,14 @@ func GetSuggestionById(id bson.ObjectId) (*Suggestion, error) {
 	return suggestion, err
 }
 
+//Checks if the specified suggestion exists
 func SuggestionExists(id bson.ObjectId) bool {
 	collection := db.GetDB().C("suggestions")
-	count, err := collection.FindId(id).Count()
+	count, err := collection.FindId(id).Limit(1).Count()
 	return count > 0 && err == nil
 }
 
+//Saves the suggestion to the database
 func (suggestion *Suggestion) Save() error {
 	collection := db.GetDB().C("suggestions")
 	_, err := collection.UpsertId(suggestion.Id, suggestion)

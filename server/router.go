@@ -9,6 +9,7 @@ import (
 	"github.com/Barbra-GbR/barbra-backend/middlewares"
 )
 
+//Creates a new router and sets all paths, middlewares etc
 func NewRouter() *gin.Engine {
 	c := config.GetConfig();
 	router := gin.New()
@@ -23,7 +24,6 @@ func NewRouter() *gin.Engine {
 	authenticationController := new(controllers.AuthenticationController)
 	userController := new(controllers.UserController)
 	suggestionController := new(controllers.SuggestionController)
-	bookmarkController := new(controllers.BookmarkController)
 
 	//----------------------------------------- Public routes -----------------------------------------
 	public := router.Group("/api/v1/")
@@ -38,7 +38,7 @@ func NewRouter() *gin.Engine {
 
 	//User profile
 	private.Handle(http.MethodGet, "/user/me", userController.GetAccount)
-	private.Handle(http.MethodPut, "/user/me", userController.UpdateProfile)
+	private.Handle(http.MethodPatch, "/user/me", userController.UpdateProfile)
 
 	//----------------------------- Private routes (enrolled accounts only) -----------------------------
 	enrolled := router.Group("/api/v1")
@@ -48,9 +48,9 @@ func NewRouter() *gin.Engine {
 	enrolled.Handle(http.MethodGet, "/suggestion", suggestionController.GetSuggestions)
 	enrolled.Handle(http.MethodGet, "/suggestion/:id", suggestionController.GetSuggestion)
 
-	//Bookmarks
-	enrolled.Handle(http.MethodPost, "/user/me/bookmark", bookmarkController.AddUserBookmark)
-	enrolled.Handle(http.MethodDelete, "/user/me/bookmark", bookmarkController.RemoveUserBookmark)
+	//User bookmarks
+	enrolled.Handle(http.MethodPost, "/user/me/bookmark", userController.AddBookmark)
+	enrolled.Handle(http.MethodDelete, "/user/me/bookmark", userController.RemoveBookmark)
 
 	return router
 }

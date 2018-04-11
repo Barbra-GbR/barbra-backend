@@ -26,7 +26,7 @@ func AuthorizationMiddleware(enrolledOnly bool) func(c*gin.Context) {
 			return
 		}
 
-		account, err := models.GetUserAccount(bson.ObjectIdHex(accountId))
+		account, err := models.GetUserAccountById(bson.ObjectIdHex(accountId))
 		if err != nil {
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return

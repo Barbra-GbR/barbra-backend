@@ -7,6 +7,7 @@ import (
 	"github.com/Barbra-GbR/barbra-backend/helpers"
 )
 
+//The UserProfile model
 type UserProfile struct {
 	Email               string `json:"email"       bson:"email,omitempty"       validate:"email,lowercase"              binding:"required"`
 	GivenName           string `json:"given_name"  bson:"given_name,omitempty"  validate:"alphaunicode,min=1,max=50"    binding:"required"`
@@ -17,6 +18,7 @@ type UserProfile struct {
 	Nickname            string `json:"nickname"    bson:"nickname,omitempty"    validate:"alphanumunicode,min=2,max=50" binding:"required"`
 }
 
+//Updates the profile with the given payload and validates it. Empty fields won't be set
 func (profile *UserProfile) UpdateInfo(payload *payloads.ProfilePayload) error {
 	collection := db.GetDB().C("users")
 	validate := helpers.GetValidator()

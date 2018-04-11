@@ -83,7 +83,7 @@ func (manager *JWTManager) GetAccountId(tokenString string) (string, error) {
 	now := time.Now().Unix()
 
 	//TODO: Id disabling of tokens (maybe)
-	if claims.NotBefore >= now || claims.Audience != j.issuer {
+	if claims.NotBefore >= now || claims.Audience != manager.issuer {
 		return "", ErrTokenInvalid
 	}
 	if claims.ExpiresAt <= now {
@@ -96,6 +96,6 @@ func (manager *JWTManager) GetAccountId(tokenString string) (string, error) {
 //Generates a new TokenId for use within JWTs
 func (manager *JWTManager) NewTokenId(accountId bson.ObjectId) string {
 	m := md5.New()
-	m.Write([]byte(accountId.Hex() + ":" + time.Now().String() + ":" + string(j.idCount)))
+	m.Write([]byte(accountId.Hex() + ":" + time.Now().String() + ":" + string(manager.idCount)))
 	return hex.EncodeToString(m.Sum(nil))
 }

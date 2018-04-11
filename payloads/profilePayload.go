@@ -1,5 +1,6 @@
 package payloads
 
+//The ProfilePayload
 type ProfilePayload struct {
 	Email      string `json:"email"       bson:"email"       validate:"omitempty,email,lowercase"`
 	GivenName  string `json:"given_name"  bson:"given_name"  validate:"omitempty,alphaunicode,min=1,max=50"`

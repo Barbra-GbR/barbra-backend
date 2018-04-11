@@ -13,21 +13,19 @@ import (
 
 func main() {
 	environment := flag.String("e", "development", "")
-
 	flag.Usage = func() {
 		fmt.Println("Usage: server -e {mode}")
 		os.Exit(1)
 	}
-
 	flag.Parse()
 
 	//Initialization
-	helpers.InitValidator()
-	config.Init(*environment)
-	db.Init()
-	auth.InitJWT()
-	auth.InitUserManager()
+	config.Initialize(*environment)
+	helpers.InitializeValidator()
+	db.Initialize()
+	auth.InitializeJWT()
+	auth.InitializeAccountManager()
 
 	//Initialize and start server
-	server.Init()
+	server.Initialize()
 }
