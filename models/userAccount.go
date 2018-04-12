@@ -1,58 +1,47 @@
 package models
 
 import (
-	"gopkg.in/mgo.v2/bson"
-	"errors"
 	"github.com/Barbra-GbR/barbra-backend/db"
 	"github.com/Barbra-GbR/barbra-backend/helpers"
 	"github.com/Barbra-GbR/barbra-backend/payloads"
-	"log"
+	"github.com/juju/errors"
+	"gopkg.in/mgo.v2/bson"
 )
 
 var (
-	ErrInvalidPayload    = errors.New("user: invalid payload")
-	ErrEmailAlreadyInUse = errors.New("user: email already in use")
+	userAccountCollectionName = "users"
 )
 
-//The UserAccount model
+// The UserAccount model
 type UserAccount struct {
-	Id                  bson.ObjectId `json:"id"       bson:"_id"                   binding:"required"`
+	ID                  bson.ObjectId `json:"id"       bson:"_id"                   binding:"required"`
 	Enrolled            bool          `json:"enrolled" bson:"enrolled"              binding:"required"`
 	Profile             *UserProfile  `json:"profile"  bson:"profile"               binding:"required"`
-	BookmarkContainerId bson.ObjectId `json:"-"        bson:"bookmark_container_id" binding:"required"`
+	BookmarkContainerID bson.ObjectId `json:"-"        bson:"bookmark_container_id" binding:"required"`
 }
 
-//Returns the UserAccount with the specified id
-func GetUserAccountById(id bson.ObjectId) (*UserAccount, error) {
+// GetUserAccountByID returns a UserAccount with the specified id from the Database
+func GetUserAccountByID(id bson.ObjectId) (*UserAccount, error) {
 	collection := db.GetDB().C("users")
-
 	account := new(UserAccount)
 	err := collection.FindId(id).One(account)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return account, nil
+	return account, err
 }
 
-//Registers a new user with the specified payload and validates it
+// RegisterUser crates a new user with the specified payload and saves him to the Database
+// It checks for duplicate emails in the Database and validates the payload
 func RegisterUser(payload *payloads.ProfilePayload) (*UserAccount, error) {
-	collection := db.GetDB().C("users")
+	collection := db.GetDB().C(userAccountCollectionName)
 	validate := helpers.GetValidator()
 
 	//Check if payload is valid
 	if err := validate.Struct(payload); err != nil {
-		log.Println(err.Error())
-		return nil, ErrInvalidPayload
+		return nil, errors.NewNotValid(err, "invalid profile payload")
 	}
 
 	//Check if email is already in use
-	if payload.Email != "" {
-		count, err := collection.Find(bson.M{"email": payload.Email}).Count()
-		if err != nil || count > 0 {
-			return nil, ErrEmailAlreadyInUse
-		}
+	if payload.Email != "" && UserEmailInUse(payload.Email) {
+		return nil, errors.AlreadyExistsf("the email %s already is already taken", payload.Email)
 	}
 
 	bookmarkContainer, err := NewBookmarkContainer()
@@ -61,7 +50,7 @@ func RegisterUser(payload *payloads.ProfilePayload) (*UserAccount, error) {
 	}
 
 	account := &UserAccount{
-		Id:       bson.NewObjectId(),
+		ID:       bson.NewObjectId(),
 		Enrolled: false,
 		Profile: &UserProfile{
 			Email:      payload.Email,
@@ -70,24 +59,34 @@ func RegisterUser(payload *payloads.ProfilePayload) (*UserAccount, error) {
 			Nickname:   payload.Nickname,
 			PictureURL: payload.PictureURL,
 		},
-		BookmarkContainerId: bookmarkContainer.Id,
+		BookmarkContainerID: bookmarkContainer.ID,
 	}
 
 	account.Enrolled = account.IsEnrolled()
 	return account, account.Save()
 }
 
-//Checks if the user has completed profile
+// UserEmailInUse checks if the given email is already exists in the Database
+// The email string should be lowercase and trimmed. It won´t be validated
+// Returns false if any errors occur
+func UserEmailInUse(email string) bool {
+	collection := db.GetDB().C(userAccountCollectionName)
+	count, err := collection.Find(bson.M{"email": email}).Count()
+	return count > 0 && err == nil
+}
+
+// IsEnrolled checks if the user has completed profile.
+// If errors occur false will be returned
 func (account *UserAccount) IsEnrolled() bool {
 	validate := helpers.GetValidator()
 	err := validate.Struct(account)
 	return err == nil
 }
 
-//Updates the UserProfile with the specifed info and validates it
+// UpdateProfile updates the UserProfile and saves it to the Database with the specified info and validates it
+// It checks for duplicate emails in the Database and validates the payload
 func (account *UserAccount) UpdateProfile(payload *payloads.ProfilePayload) error {
 	err := account.Profile.UpdateInfo(payload)
-
 	if err != nil {
 		return err
 	}
@@ -96,20 +95,21 @@ func (account *UserAccount) UpdateProfile(payload *payloads.ProfilePayload) erro
 	return account.Save()
 }
 
-//Returns the users bookmark-container
+// GetBookmarkContainer returns the users bookmark-container
+// TODO: Without database call
 func (account *UserAccount) GetBookmarkContainer() (*BookmarkContainer, error) {
-	return GetBookmarkContainerById(account.BookmarkContainerId)
+	return GetBookmarkContainerById(account.BookmarkContainerID)
 }
 
-//Saves the UserAccount to the database
+// Save inserts the account into the database. If it already exists it will be updated
 func (account *UserAccount) Save() error {
-	collection := db.GetDB().C("users")
-	_, err := collection.UpsertId(account.Id, account)
+	collection := db.GetDB().C(userAccountCollectionName)
+	_, err := collection.UpsertId(account.ID, account)
 	return err
 }
 
-//Deletes the useraccount from the database TODO Remove bookmarks etc too
+// Delete deletes the useraccount from the database TODO: Remove bookmarks etc too
 func (account *UserAccount) Delete() error {
-	collection := db.GetDB().C("users")
-	return collection.RemoveId(account.Id)
+	collection := db.GetDB().C(userAccountCollectionName)
+	return collection.RemoveId(account.ID)
 }

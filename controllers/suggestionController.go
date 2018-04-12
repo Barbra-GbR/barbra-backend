@@ -1,16 +1,22 @@
 package controllers
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/Barbra-GbR/barbra-backend/helpers"
 	"github.com/Barbra-GbR/barbra-backend/models"
-	"gopkg.in/mgo.v2/bson"
+	"github.com/gin-gonic/gin"
 )
 
 //Provides an webInterface for generating and managing suggestions
 type SuggestionController struct{}
 
-func (SuggestionController) GetSuggestions(c *gin.Context) {
+func (controller *SuggestionController) GetSuggestions(c *gin.Context) {
+	if c.Query("ids") != "" {
+		controller.GetSuggestionsById(c)
+		return
+	}
+
 	//TODO
 	dummyArticle1, _ := models.GetSuggestion(
 		"https://medium.com/@saginadir/why-i-love-golang-90085898b4f7",
@@ -42,19 +48,37 @@ func (SuggestionController) GetSuggestions(c *gin.Context) {
 	c.JSON(http.StatusOK, []*models.Suggestion{dummyArticle1, dummyArticle2, dummyArticle3})
 }
 
-//Returns the suggestion with the specified id
-func (SuggestionController) GetSuggestion(c *gin.Context) {
-	id := c.Param("id")
-	if !bson.IsObjectIdHex(id) {
+//GetSuggestion returns the suggestion with the specified id
+func (controller *SuggestionController) GetSuggestion(c *gin.Context) {
+	id, err := helpers.StringToObjectId(c.Param("id"))
+	if err != nil {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
 
-	suggestion, err := models.GetSuggestionById(bson.ObjectIdHex(id))
+	suggestion, err := models.GetSuggestionById(id)
 	if err != nil {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
 
 	c.JSON(http.StatusOK, suggestion)
+}
+
+//Returns all suggestions with matching ids set in the ids query string
+func (controller *SuggestionController) GetSuggestionsById(c *gin.Context) {
+	ids, err := helpers.StringToObjectIds(c.Query("ids"))
+	if err != nil {
+		//TODO change
+		c.AbortWithStatus(http.StatusTeapot)
+		return
+	}
+
+	suggestions, err := models.GetSuggestionsById(ids)
+	if err != nil {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	c.JSON(http.StatusOK, suggestions)
 }

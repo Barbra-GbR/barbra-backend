@@ -45,7 +45,7 @@ func NewRouter() *gin.Engine {
 	enrolled.Use(middlewares.AuthorizationMiddleware(true))
 
 	//Suggestions
-	enrolled.Handle(http.MethodGet, "/suggestion", suggestionController.GetSuggestions)
+	enrolled.Handle(http.MethodGet, "/suggestions", suggestionController.GetSuggestions)
 	enrolled.Handle(http.MethodGet, "/suggestion/:id", suggestionController.GetSuggestion)
 
 	//User bookmarks
